@@ -38,18 +38,20 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
     return (
       <div>
         <table>
-          <tr>
-            <td><div id="title">{this.state.title}</div>
-              <div id="comment">{this.state.comment}</div>
-              <div id="output">
-                {this.state.output}
-              </div>
-              <div className={styles.visioSvg}>
-                <div id='some-empty-div-on-the-page'></div>
-              </div>
-            </td>
-            <td>
-            </td></tr>
+          <tbody>
+            <tr>
+              <td><div id="title">{this.state.title}</div>
+                <div id="comment">{this.state.comment}</div>
+                <div id="output">
+                  {this.state.output}
+                </div>
+                <div className={styles.visioSvg}>
+                  <div id='some-empty-div-on-the-page'></div>
+                </div>
+              </td>
+              <td>
+              </td></tr>
+          </tbody>
         </table>
       </div>);
   }
@@ -101,7 +103,7 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
           var shape = me.parseShapeElement(elm);
           if (!shape) return;
 
-          console.log("SVG Click");
+          // console.log("SVG Click");
 
           // Clear the previous selection box (if any)
           // if (me.selectionRect) {
@@ -206,7 +208,7 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
           me.selectionRect.attr({
             x: 0,
             y: 0,
-            witdh: 0,
+            width: 0,
             height: 0,
             fill: "none",
             stroke: "red",
@@ -239,6 +241,8 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
 
       // The shape type tells us what kind of Visio shape we are dealing with
       shape["type"] = elm.node.attributes["shapeType"].value;
+
+      let binteresting: boolean=false;
 
       // Make sure this Visio shape is of interest to us.
       // "dynamic connector" corresponds to arrows
@@ -309,11 +313,18 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
             let un = ul[k];
             if (un.nodeName == "v:ud") {
               if (un.attributes["v:nameu"] && un.attributes["v:val"]) {
-                shape["defs"][un.attributes["v:nameu"].value] = un.attributes["v:val"].value;
+                let nameu: string= un.attributes["v:nameu"].value;
+                if (nameu.toLowerCase()=="SemTalkInstID".toLowerCase()) {
+                  binteresting=true;
+                }
+                shape["defs"][nameu] = un.attributes["v:val"].value;
               }
             }
           }
         }
+      }
+      if (!binteresting) {
+        return null;
       }
       // console.log(shape);
       return shape;
@@ -326,41 +337,41 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
 
   private resizeSvgAndContainer(_objectElement: any, rp: any) {
     return;
-/*     // Get bounding box of the (Visio) page
-    this.rootPaper.attr({ width: "400px", height: "800px" });
-    rp.selectAll("g").forEach((elm: any) => {
-      if (elm.node.attributes[this.groupcontext] && elm.node.attributes[this.groupcontext].value === "foregroundPage") {
+    /*     // Get bounding box of the (Visio) page
+        this.rootPaper.attr({ width: "400px", height: "800px" });
+        rp.selectAll("g").forEach((elm: any) => {
+          if (elm.node.attributes[this.groupcontext] && elm.node.attributes[this.groupcontext].value === "foregroundPage") {
 
-        var visioPage = elm.node;
-        // The "Bounding Box" contains information about an SVG element's position
-        var bbox = visioPage.getBBox();
-        var x = bbox.x;
-        var y = bbox.y;
-        var w = bbox.width;
-        var h = bbox.height;
+            var visioPage = elm.node;
+            // The "Bounding Box" contains information about an SVG element's position
+            var bbox = visioPage.getBBox();
+            var x = bbox.x;
+            var y = bbox.y;
+            var w = bbox.width;
+            var h = bbox.height;
 
-        // Figure out a new viewBox that shows as much as possible of the drawing
-        // The viewbox is a property of SVG that specifies what part of the drawing to display. The actual drawing can extend beyong this viewbox so you would have to pan the drawing to view it all.
-        // It is not perfect. This is probably because getBBox does not include account for strokeWidth, and I have yet to find out a way to figure this out.
-        // This can cause shapes to be clipped. I am adding marging to the new viewbox to try and fix this. Using a relative marginY appears to give decent result for most of my needs. You may need to try something different yourself.
-        var marginX = 1;
-        var marginY = (w / h);
-        var newViewBox = (x - marginX) + " " + (y - marginY) + " " + (w + marginX * 2) + " " + (h + marginY * 2);
+            // Figure out a new viewBox that shows as much as possible of the drawing
+            // The viewbox is a property of SVG that specifies what part of the drawing to display. The actual drawing can extend beyong this viewbox so you would have to pan the drawing to view it all.
+            // It is not perfect. This is probably because getBBox does not include account for strokeWidth, and I have yet to find out a way to figure this out.
+            // This can cause shapes to be clipped. I am adding marging to the new viewbox to try and fix this. Using a relative marginY appears to give decent result for most of my needs. You may need to try something different yourself.
+            var marginX = 1;
+            var marginY = (w / h);
+            var newViewBox = (x - marginX) + " " + (y - marginY) + " " + (w + marginX * 2) + " " + (h + marginY * 2);
 
-        // The width of the container is fixed. But we can alter the height to show as much as possible of the drawing at its specified aspect ratio.
-        //  if (host != undefined) {
-        // let hw: number = host.width() as number;
-        // host.height(hw / (w / h));
-        //  host.height(300);
-        //  host.width(300);
-        // }
-        // Set SVG to make Visio page fill entire object canvas
-        // Here I am also using Snap's animation feature for a nice effect when loading the page
-        // 300 is the animation duration, "mina.easeinout" is the animation easing. Other easings are: easeinout, linear, easein, easeout, backin, backout, elastic & bounce.
-        // rp.animate({ viewBox: newViewBox }, 300, mina.easeinout);
-        this.rootPaper.animate({ viewBox: newViewBox }, 300);
-      }
-    }); */
+            // The width of the container is fixed. But we can alter the height to show as much as possible of the drawing at its specified aspect ratio.
+            //  if (host != undefined) {
+            // let hw: number = host.width() as number;
+            // host.height(hw / (w / h));
+            //  host.height(300);
+            //  host.width(300);
+            // }
+            // Set SVG to make Visio page fill entire object canvas
+            // Here I am also using Snap's animation feature for a nice effect when loading the page
+            // 300 is the animation duration, "mina.easeinout" is the animation easing. Other easings are: easeinout, linear, easein, easeout, backin, backout, elastic & bounce.
+            // rp.animate({ viewBox: newViewBox }, 300, mina.easeinout);
+            this.rootPaper.animate({ viewBox: newViewBox }, 300);
+          }
+        }); */
   }
 
 }
