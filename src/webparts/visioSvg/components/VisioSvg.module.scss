@@ -1,7 +1,14 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
 .visioSvg {
-  .container {
+  .svgobject {
+    background-color: white;
+    border: 1px dashed #aaa;
+    float: left;
+    //width: 75%;
+    vertical-align:top;	/* prevents spurious border below the SVG */
+   }
+     .container {
     max-width: 700px;
     margin: 0px auto;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);

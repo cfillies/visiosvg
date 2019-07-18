@@ -34,7 +34,7 @@
       },
       "runtimeArgs": [
         "--remote-debugging-port=9222",
-        "-incognito"
+        // "-incognito"
       ]
     }
   ]
