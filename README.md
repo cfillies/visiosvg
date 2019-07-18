@@ -1,6 +1,6 @@
 ## visiosvg
 
-This is where you include your WebPart documentation.
+migration of https://github.com/rlv-dan/Tutorial-code/tree/master/Parse%20Visio%20SVG%20drawings%20with%20Snap.svg to Typescript / SPFx
 
 ### Building the code
 
