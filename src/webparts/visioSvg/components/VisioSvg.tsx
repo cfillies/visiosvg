@@ -45,6 +45,7 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
                 <div id="output">
                   {this.state.output}
                 </div>
+
                 <div className={styles.visioSvg}>
                   <div id='some-empty-div-on-the-page'></div>
                 </div>
@@ -69,12 +70,14 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
     this.svgContainer = Snap("#some-empty-div-on-the-page");
     let me: VisioSvg = this;
 
-    Snap.load("https://semtalk.sharepoint.com/teams/tender/SVG/tender.svg", (data: any) => {
+
+    // document must have Visio data and NO background pages!
+    Snap.load("https://semtalk.sharepoint.com/teams/tender/SVG2/tender --- Initiate Calls.svg", (data: any) => {
       //    Snap.load("./VisioFlowchart.svg", (data: any) => {
+      this.groupcontext = "v:groupcontext";
       this.svgContainer.append(data);
       this.svgPaper = Snap(this.svgContainer.node.firstElementChild);
       this.rootPaper = this.svgPaper.paper;
-      this.groupcontext = "v:groupcontext";
       this.selectionRect = this.rootPaper.rect(0, 0, 0, 0);
 
 
@@ -242,7 +245,7 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
       // The shape type tells us what kind of Visio shape we are dealing with
       shape["type"] = elm.node.attributes["shapeType"].value;
 
-      let binteresting: boolean=false;
+      let binteresting: boolean = false;
 
       // Make sure this Visio shape is of interest to us.
       // "dynamic connector" corresponds to arrows
@@ -313,9 +316,9 @@ export default class VisioSvg extends React.Component<IVisioSvgProps, IVisioSvgS
             let un = ul[k];
             if (un.nodeName == "v:ud") {
               if (un.attributes["v:nameu"] && un.attributes["v:val"]) {
-                let nameu: string= un.attributes["v:nameu"].value;
-                if (nameu.toLowerCase()=="SemTalkInstID".toLowerCase()) {
-                  binteresting=true;
+                let nameu: string = un.attributes["v:nameu"].value;
+                if (nameu.toLowerCase() == "SemTalkInstID".toLowerCase()) {
+                  binteresting = true;
                 }
                 shape["defs"][nameu] = un.attributes["v:val"].value;
               }
